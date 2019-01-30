@@ -112,3 +112,9 @@ kubectl apply -f flask_deployment.yaml
 ```
 
 9. [Kubernetes cheat sheets](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+
+10. Delete the namespace ( deletes all resources on that namespace)
+
+```bash
+kubectl delete namespaces flask-app   
+```

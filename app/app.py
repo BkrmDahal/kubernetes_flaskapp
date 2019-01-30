@@ -22,11 +22,11 @@ def isInt(s):
     except ValueError:
         return False
 
-@app.route('/api/welcome', methods = ['PUT', 'GET'])
-def cluster(path):
+@app.route('/', methods = ['PUT', 'GET'])
+def cluster():
     return "welcome to cluster"
 
-@app.route('/<path:path>', methods = ['PUT', 'GET'])
+@app.route('/<path:path>/', methods = ['PUT', 'GET'])
 def home(path):
 
     if (request.method == 'PUT'):
@@ -34,18 +34,15 @@ def home(path):
         event['last_updated'] = int(time.time())
         event['ttl'] = ttl
         db.delete(path) #remove old keys
-        db.hmset(path, event)
+        db.set(path, event)
         db.expire(path, ttl)
         return json.dumps(event), 201
 
     if not db.exists(path):
         return "Error: thing doesn't exist"
 
-    event = db.hgetall(path)
-    event["ttl"] = db.ttl(path)
-    #cast integers accordingly, nested arrays, dicts not supported for now  :(
-    dict_with_ints = dict((k,int(v) if isInt(v) else v) for k,v in event.iteritems())
-    return json.dumps(dict_with_ints), 200
+    event = db.get(path)
+    return json.dumps(event), 200
 
 
 if __name__ == "__main__":
