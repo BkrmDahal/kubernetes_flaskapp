@@ -34,15 +34,17 @@ def home(path):
         event['last_updated'] = int(time.time())
         event['ttl'] = ttl
         db.delete(path) #remove old keys
-        db.set(path, event)
+        db.set(path, event[path])
         db.expire(path, ttl)
-        return json.dumps(event), 201
+        return json.dumps({"message" :"success",
+                           "data": event}), 201
 
     if not db.exists(path):
         return "Error: thing doesn't exist"
 
     event = db.get(path)
-    return json.dumps(event), 200
+    return json.dumps({"message": "success", 
+                       path: event.decode('utf-8')}), 200
 
 
 if __name__ == "__main__":

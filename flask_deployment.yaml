@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: flask
-        image: bkrmdahal/flask_app:0.3
+        image: bkrmdahal/flask_app:0.5.2
         resources:
           limits:
             cpu: 1000m
