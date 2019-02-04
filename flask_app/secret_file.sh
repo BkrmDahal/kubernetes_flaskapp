@@ -1,0 +1,1 @@
+kubectl create secret tls custom-tls-certs --key /Users/bikramdahal/Arch/kub_cluster/keys/tls.key --cert /Users/bikramdahal/Arch/kub_cluster/keys/tls.crt

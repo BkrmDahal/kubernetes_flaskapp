@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask2
+  labels:
+    app: flask2
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+
+  selector:
+    app: flask2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask2
+  labels:
+    app: flask2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask2
+  template:
+    metadata:
+      labels:
+        app: flask2
+    spec:
+      containers:
+      - name: flask2
+        image: bkrmdahal/pikachu:0.0.2
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws
+              key: key
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: aws
+              key: region
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws
+              key: access
+        - name: FLASK_ENV
+          valueFrom:
+            secretKeyRef:
+              name: aws
+              key: env
+        ports:
+        - containerPort: 5000

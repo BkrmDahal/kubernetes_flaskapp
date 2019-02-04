@@ -16,6 +16,7 @@ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"templat
 
 ```
 
+
 3. make secret
 
 ```bash
