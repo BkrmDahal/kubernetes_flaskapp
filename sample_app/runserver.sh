@@ -1,0 +1,1 @@
+gunicorn --workers 1 -k gthread --thread=8 --timeout 90 --name app -b 0.0.0.0:5000 --reload app:app

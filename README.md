@@ -1,10 +1,10 @@
-## Step for deploying in Kub cluster
-1. Copy config to your kube config **only if your using digital ocean managed cluster**
+## Step for deploy in Kub cluster
+1. Copy config to your kube config 
 ```bash
 cp config.yaml ~/.kube/config 
 ```
 
-2. Always make news new namespace
+2. Always make new namespace
 
 ```yaml
 kind: Namespace
@@ -56,14 +56,14 @@ spec:
           requests:
             cpu: 100m
         env:
-          - name: ELASTICSEARCH_URL
-            value: http://elasticsearch:9200
+          - name: REDIS_HOST
+            value: http://redis:6378
         ports:
         - containerPort: 5000
 
 ```
 
-4. check deplopment 
+4. check deployment 
 ```bash
 echo "check all resource"
 kubectl get all --namespace flask-app 
@@ -92,21 +92,26 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: flask-ingress
-  namespace: flask-app
-  annotations:
-    ingress.kubernetes.io/rewrite-target: /
+  name: echo-ingress
+  annotations:  
+    kubernetes.io/ingress.class: nginx
 spec:
+
+  tls:
+  - hosts:
+    - test.rpy3.com
+    secretName: secret/custom-tls-certs
   rules:
-  - http:
+  - host: test.rpy3.com
+    http:
       paths:
-        - path: /api
-          backend:
-            serviceName: flask
-            servicePort: 5000
+      - backend:
+          serviceName: flask
+          servicePort: 5000
+        path: /api
 ```
 
-8. Make change using yaml edit
+8. apply changes to nod using yaml edit
 ```bash
 kubectl apply -f flask_deployment.yaml   
 ```
@@ -117,4 +122,55 @@ kubectl apply -f flask_deployment.yaml
 
 ```bash
 kubectl delete namespaces flask-app   
+```
+
+11. Make secrets from files
+
+```bash
+kubectl create secret tls custom-tls-cert --key /Users/bikramdahal/Arch/kub_cluster/tls.key --cert /Users/bikramdahal/Arch/kub_cluster/tls.crt
+```
+
+12. Make secrets from token
+
+```bash
+kubectl create secret generic aws --from-literal=key=AWS_ACCESS_KEY_ID=xxx --from-literal=region=us-east-1 --from-literal=env=xxxx --from-literal=access=Xxxxx
+```
+
+13. Make repo secrets
+```bash
+kubectl create secret docker-registry regcred --namespace flask-app --docker-server=https://registry.gitlab.com --docker-username=XXXX --docker-password=XXXXXX --docker-email=XXXX
+```
+__add pull image from private repo__
+
+```yaml
+spec:
+      containers:
+      - name: flask
+        image: registry.gitlab.com/experiment-devops/flask_app/flask_app:1.0.0
+        resources:
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: REDIS_HOST
+            value: redis
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+      - name: regcred
+```
+
+
+## Helm
+1. Start the helm
+```bash
+helm init
+
+echo "sleep for 10 sec to start tiller"
+sleep 10
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+
 ```
